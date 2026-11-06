@@ -1,0 +1,32 @@
+# Veri Kartı (Data Card) - Kura #41
+
+## Genel Bilgiler
+* **Proje / Senaryo:** Kargo Paketleri Etiket Okuma ve LLM Maliyet Analizi (Kura #41)
+* **Kaynak:** Simüle edilmiş kurumsal kargo veri seti ve OCR/LLM log örnekleri (%70 gerçekçi lojistik dağılım, %30 model simülasyonu).
+* **Lisans:** MIT Open License
+* **İndirme / Üretim Tarihi:** Kasım 2026
+* **Boyutlar:** 3 tablo, her biri 520 satır.
+
+## Tablo Yapıları ve Sütunlar
+1. **packages.csv**: 
+   * `id`: Paket kimliği (PK)
+   * `package_type`: Paket türü (Koli, Zarf, Kutu, Palet, Dosya)
+   * `weight_kg`: Paket ağırlığı (Bazı satırlarda gram cinsinden "g" ekstripos ile birim tutarsızlığı içerir)
+   * `recorded_at`: Kayıt zaman damgası
+2. **readings.csv**: 
+   * `id`: Okuma kimliği (PK)
+   * `package_id`: İlgili paket kimliği (FK)
+   * `image_quality_score`: Görüntü kalitesi (1-5 arası, bazı satırlarda eksik veriler için `NULL` içerir)
+   * `read_succeeded`: Okumanın başarılı olup olmadığı (True/False)
+3. **llm_calls.csv**: 
+   * `id`: Çağrı kimliği (PK)
+   * `okuma_id`: İlgili okuma kimliği (FK)
+   * `model_name`: Kullanılan LLM modeli (gpt-4o-mini, claude-3-haiku vb.)
+   * `input_tokens` / `output_tokens`: Token kullanım miktarları
+   * `latency_ms`: Yanıt gecikme süresi (milisaniye)
+   * `cost_usd`: Hesaplanan çağrı maliyeti (Okuma başarısız olsa dahi girdi işlendiği için maliyet yansıtılmıştır)
+
+## Hafta 4 Veri Temizleme ve Sorun Notları
+* **Kalite Skoru Eksiklikleri:** `readings` tablosunda kamera kaynaklı belirsizlikler nedeniyle bazı `image_quality_score` değerleri `NULL` bırakılmıştır.
+* **Başarısız Okuma Maliyetleri:** Okuma başarısız (`read_succeeded = False`) olan durumlarda çıktı tokeni 0 olmasına rağmen girdi maliyeti sistemde tutulmuştur.
+* **Birim Tutarsızlığı:** `packages` tablosundaki ağırlık sütununda bazı değerler gram (örn. "1500g") formatında girilmiştir; SQL analizlerinde dönüştürülmesi gerekmektedir.
